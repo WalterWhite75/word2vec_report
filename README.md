@@ -1,3 +1,9 @@
+# Projet Word2Vec - Analyse sémantique de synopsis de films
+
+Ce projet vise à entraîner un modèle Word2Vec sur un large corpus de synopsis de films afin d'explorer les relations sémantiques entre les mots et les films. 
+Il comprend les étapes de prétraitement, d'entraînement, d'évaluation et de visualisation des embeddings. 
+Les résultats sont présentés sous forme de visualisations interactives et d’un rapport scientifique détaillé.
+
 ##  Structure du dépôt
 
 Le projet est organisé de la manière suivante :
