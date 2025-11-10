@@ -1,19 +1,9 @@
-#  Rapport Word2Vec – Projet M2 BIDABI (Université Paris 13)
-
-Analyse complète d’un corpus de films à l’aide de **Word2Vec** (Gensim) et de visualisations interactives via **Dash** et **t-SNE**.  
-Ce projet a été réalisé dans le cadre du Master 2 Informatique & Big Data (BIDABI) – Année universitaire 2025/2026.
-
----
-
-##  Objectifs du projet
-
-- Prétraiter un corpus de synopsis et métadonnées de films (tokenisation, lemmatisation, filtrage DF).
-- Entraîner un modèle **Word2Vec (skip-gram)** adapté au corpus.
-- Évaluer la cohérence sémantique (similarités cosinus, “sanity check” des genres).
-- Visualiser les relations via **t-SNE** (mots & films).
-- Fournir une **interface Dash** pour l’exploration interactive.
-- Produire un **rapport scientifique LaTeX/PDF** expliquant la démarche.
-
----
-
 ##  Structure du dépôt
+
+Le projet est organisé de la manière suivante :
+
+- `src/` : Contient les scripts Python pour le prétraitement des données, l'entraînement du modèle Word2Vec, les évaluations et les visualisations.
+- `data/` : Regroupe les données brutes et prétraitées, notamment les synopsis et métadonnées des films.
+- `w2v_out/` : Stocke les résultats générés, tels que les modèles entraînés, les fichiers de similarités, et les visualisations interactives.
+- `rapport_word2vec.tex` et `rapport_word2vec.pdf` : Le rapport scientifique final en LaTeX et sa version PDF compilée.
+- `README.md` : La documentation principale du projet, décrivant les objectifs, la structure et les instructions d'utilisation.
