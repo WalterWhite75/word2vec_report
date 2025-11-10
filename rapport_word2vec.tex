@@ -1,0 +1,202 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{lmodern}   % Police propre par défaut
+\usepackage{setspace}
+% ----- Option Times New Roman (XeLaTeX) -----
+% \usepackage{fontspec}
+% \setmainfont{Times New Roman}
+% --------------------------------------------
+
+\geometry{margin=2.5cm}
+\setlength{\parskip}{0.6em}
+\setlength{\parindent}{0pt}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+% ========= Variables faciles à mettre à jour =========
+\newcommand{\ReportTitle}{Fouille de données textuelles\\
+Rapport approfondi sur Word2Vec : de la théorie à la pratique}
+\newcommand{\AuthorName}{Mevlut Cakin}
+\newcommand{\ProgramName}{Master Informatique \& Big Data}
+\newcommand{\SchoolYear}{2025/2026}
+
+% Paramètres du meilleur run (mets tes dernières valeurs)
+\newcommand{\ModelVectorSize}{200}
+\newcommand{\ModelWindow}{10}
+\newcommand{\ModelMinCount}{10}
+\newcommand{\ModelEpochs}{10}
+\newcommand{\SanityCheck}{72.8\%}
+\newcommand{\Entropy}{12.255}
+
+% Emplacements des figures (mets les PNG à côté du .tex)
+\newcommand{\FigTSNEWords}{tsne_words.png}
+\newcommand{\FigTSNEMovies}{tsne_movies_by_genre.png}
+\newcommand{\FigDashboard}{dashboard.png}
+
+\begin{document}
+\begin{titlepage}
+  \centering
+  {\Large \ProgramName\par}
+  \vspace{1cm}
+  {\LARGE \textbf{\ReportTitle}\par}
+  \vspace{0.8cm}
+  {\large \SchoolYear\par}
+  \vfill
+  {\large Auteur : \textbf{\AuthorName}\par}
+  \vspace{1cm}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+Ce projet s'inscrit dans le cadre de l'analyse de données textuelles appliquée à une base de données de films.
+L'objectif est d'explorer l'utilisation des \emph{word embeddings}, en particulier \textbf{Word2Vec}, pour extraire des représentations vectorielles porteuses de relations sémantiques à partir des synopsis, tags et métadonnées.
+Nous proposons une démarche complète : prétraitement, entraînement, visualisation et évaluation, ainsi qu'une interface \textbf{Dash} pour l'exploration interactive.
+
+\section{Contexte et objectifs}
+Nous visons à :
+\begin{itemize}[left=0pt,itemsep=0.2em]
+  \item Prétraiter un corpus de descriptions et métadonnées de films (tokenisation, normalisation, stopwords, détection de \emph{phrases}).
+  \item Entraîner un modèle \textbf{Word2Vec} (\emph{skip-gram}) adapté au corpus.
+  \item Évaluer la qualité des embeddings (distribution des similarités, cohérence \emph{genres vs. voisins}).
+  \item Visualiser les relations sémantiques via \textbf{t-SNE} (mots et films) et un \textbf{dashboard}.
+\end{itemize}
+
+\section{Théorie de Word2Vec}
+\subsection{Concepts fondamentaux}
+Word2Vec apprend une représentation continue des mots dans un espace de dimension réduite; la proximité géométrique reflète des proximités sémantiques.
+
+\subsection{Modèles Word2Vec}
+\paragraph{CBOW} prédit le mot cible $w_t$ à partir d'une fenêtre de contexte $w_{t-m}, \dots, w_{t+m}$ et maximise:
+\begin{equation}
+P\big(w_t \mid w_{t-m}, \dots, w_{t+m}\big), \quad
+J_{\mathrm{CBOW}} = -\sum_{t=1}^{T}\log P(w_t \mid w_{t-m}, \dots, w_{t+m}).
+\end{equation}
+
+\paragraph{Skip-gram} prédit les mots du contexte à partir du mot cible $w_t$ et maximise:
+\begin{equation}
+P\big(w_{t-m}, \dots, w_{t+m} \mid w_t\big), \quad
+J_{\mathrm{SG}} = -\sum_{t=1}^{T}\sum_{\substack{-m \le j \le m \\ j \ne 0}} \log P(w_{t+j}\mid w_t).
+\end{equation}
+
+\subsection{Optimisation}
+Pour réduire le coût du \texttt{softmax} :
+\begin{itemize}[left=0pt,itemsep=0.2em]
+  \item \textbf{Negative Sampling} : mise à jour sur un petit sous-ensemble de \emph{mots négatifs};
+  \item \textbf{Hierarchical Softmax} : approximation via arbre de Huffman.
+\end{itemize}
+
+\section{Mise en pratique (Gensim)}
+\subsection{Prétraitement des données}
+Minuscules, ponctuation, \emph{stopwords}, lemmatisation, détection de bigrammes (\texttt{Phrases}). Filtrage DF (tokens trop rares ou trop fréquents).
+
+\subsection{Entraînement du modèle}
+Nous retenons \emph{skip-gram} avec:
+\[
+\text{vector\_size}=\ModelVectorSize,\quad
+\text{window}=\ModelWindow,\quad
+\text{min\_count}=\ModelMinCount,\quad
+\text{epochs}=\ModelEpochs,\quad
+\text{negative}=15,\; \text{sample}=10^{-5}.
+\]
+
+\subsection{Indicateurs de corpus}
+Entropie empirique $\approx \Entropy$ bits; médiane $\approx 33$ tokens/film (à ajuster selon ton dernier run).
+
+\section{Analyse des résultats}
+\subsection{Similarités et cohérence sémantique}
+Distribution des similarités cosinus entre voisins et \emph{matrice de voisinage} (top-$k$).
+Sanity check \emph{genres en commun}: \SanityCheck.
+
+\subsection{Visualisations t-SNE}
+\paragraph{Espace des mots.}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.9\linewidth]{\FigTSNEWords}
+  \caption{Projection t-SNE des mots (Word2Vec).}
+  \label{fig:tsne_words}
+\end{figure}
+
+\paragraph{Espace des films.}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.9\linewidth]{\FigTSNEMovies}
+  \caption{Projection t-SNE des films (moyenne des tokens), colorée par genre.}
+  \label{fig:tsne_movies}
+\end{figure}
+
+\subsection{Interface interactive (Dash)}
+\begin{itemize}[left=0pt,itemsep=0.2em]
+  \item Voisins de mots (barres triées, cosinus).
+  \item t-SNE filtrable (mots/films), labels optionnels.
+  \item Page \emph{Synthèse \& Analyse} (paramètres, histogramme, heatmap).
+\end{itemize}
+\begin{figure}[H]\centering
+  \includegraphics[width=0.9\linewidth]{\FigDashboard}
+  \caption{Extrait du dashboard d'exploration (Dash).}
+\end{figure}
+
+\subsection{Correspondance script vs dashboard : ce qui est affiché et pourquoi}
+
+Les résultats visibles dans le \textbf{dashboard} et dans ce rapport proviennent des \emph{mêmes artefacts} produits par le script \texttt{w2v\_movies.py}. Autrement dit, les graphes affichés dans l'application Dash et les images insérées ici (Figure~\ref{fig:tsne_words} pour les mots et Figure~\ref{fig:tsne_movies} pour les films) décrivent la \textbf{même structure sémantique} apprise par le modèle.
+
+\paragraph{Artefacts produits et consommés.} Le script génère les fichiers suivants dans le dossier de sortie (par défaut \texttt{\string~/w2v\_out}) :
+\begin{itemize}[left=0pt,itemsep=0.2em]
+  \item \texttt{w2v\_movies.kv} : vecteurs Word2Vec (mots) utilisés pour calculer les voisins et le t-SNE des mots ;
+  \item \texttt{movie\_embeddings.csv} : embeddings moyens des films (moyenne des tokens) utilisés pour le t-SNE des films ;
+  \item \texttt{neighbors.csv} : voisins (top-$k$) et similarités cosinus, visualisés en barres dans l'onglet \emph{Voisins de mots} ;
+  \item \texttt{tsne\_words.csv} / \texttt{tsne\_movies.csv} (quand activé) : coordonnées 2D exploitées par le dashboard pour afficher les nuages de points ;
+  \item \texttt{tsne\_\*.png} : captures fixes insérées dans le présent rapport.
+\end{itemize}
+
+\paragraph{Pourquoi les affichages concordent.}
+\begin{enumerate}[left=0pt,itemsep=0.2em]
+  \item Le dashboard lit \texttt{neighbors.csv} et (si présents) \texttt{tsne\_words.csv} / \texttt{tsne\_movies.csv} produits par \texttt{w2v\_movies.py}. 
+  \item Les figures de ce rapport utilisent les mêmes données (exports PNG) issues du \emph{dernier run}.
+  \item À paramètres identiques (taille de fenêtre, \texttt{min\_count}, négatifs, etc.) et au même dossier de sortie, les courbes et nuages affichés sont donc \textbf{cohérents et comparables}.
+\end{enumerate}
+
+\paragraph{Quand un écart peut apparaître (et comment le corriger).}
+\begin{enumerate}[left=0pt,itemsep=0.2em]
+  \item \textbf{Artefacts obsolètes ou manquants} : des \texttt{*.csv} / \texttt{*.png} plus anciens que le modèle. \emph{Correctif} : relancer avec \texttt{--recompute-tsne} ou supprimer \texttt{tsne\_\*.csv}, \texttt{tsne\_\*.png}, \texttt{neighbors.csv} avant un nouveau run.
+  \item \textbf{Chemins différents} entre le script et le dashboard (ex. \texttt{\string~/w2v\_out} vs \texttt{\string~/Desktop/w2v\_project/w2v\_out}). \emph{Correctif} : aligner \texttt{OUTDIR} du script et \texttt{BASE\_W2V\_OUT} de l'app Dash sur le \textbf{même dossier}.
+  \item \textbf{Échantillonnage/mode} (\textit{MODE LIGHT} vs \textit{FULL}) ou \textbf{paramètres} d'entraînement différents. \emph{Correctif} : utiliser exactement les hyperparamètres documentés (\texttt{vector\_size=\ModelVectorSize}, \texttt{window=\ModelWindow}, \texttt{min\_count=\ModelMinCount}, \texttt{epochs=\ModelEpochs}, \texttt{negative=15}, \texttt{sg=1}).
+  \item \textbf{Stochasticité du t-SNE} : la topologie locale est stable mais l'agencement global peut légèrement varier d'un run à l'autre. \emph{Correctif} : fixer \texttt{random\_state} et conserver les mêmes fichiers \texttt{tsne\_\*.csv}.
+\end{enumerate}
+
+\paragraph{Vérifications rapides.}
+\begin{itemize}[left=0pt,itemsep=0.2em]
+  \item Les timestamps de \texttt{neighbors.csv} et \texttt{movie\_embeddings.csv} coïncident avec l'heure du dernier entraînement ;
+  \item Le \emph{Sanity check} (part de voisins partageant $\ge 1$ genre) affiché en console est \textbf{\SanityCheck} et le dashboard reporte la même tendance ;
+  \item Le nombre de points dans le t-SNE des films correspond aux lignes de \texttt{movie\_embeddings.csv} (après éventuels filtres).
+\end{itemize}
+
+\paragraph{Conclusion.} Parce que script et dashboard consomment les \emph{mêmes artefacts}, leurs graphiques concordent par construction. Tout écart pratique provient presque toujours d'un problème de \emph{chemin}, de \emph{cache} ou de \emph{paramètres} non alignés — et se corrige via la procédure ci-dessus.
+
+\section{Limites et pistes d'amélioration}
+\begin{itemize}[left=0pt,itemsep=0.2em]
+  \item \textbf{Dépendance au corpus} (couverture/homogénéité).
+  \item \textbf{Tokens génériques} à filtrer (bruit).
+  \item \textbf{t-SNE} : ajuster perplexité/sous-échantillonnage.
+  \item \textbf{Pistes} : FastText (sous-mots), rétrofit lexiques, fine-tuning orienté tâche.
+\end{itemize}
+
+\section{Conclusion}
+Word2Vec cartographie efficacement la sémantique d’un corpus de films. Couplé à t-SNE et un dashboard, il permet une exploration rapide et pédagogique des proximités entre mots et œuvres.
+
+\section*{Références}
+\begin{itemize}[left=0pt,itemsep=0.2em]
+  \item Mikolov, T. et al. (2013). \emph{Efficient Estimation of Word Representations in Vector Space}.
+  \item Documentation Gensim : \url{https://radimrehurek.com/gensim/}
+  \item Stanford CS224n : \url{https://web.stanford.edu/class/cs224n/}
+\end{itemize}
+
+\end{document}
