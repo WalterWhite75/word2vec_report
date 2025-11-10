@@ -13,9 +13,9 @@ Le projet est organisé de la manière suivante :
 - `w2v_out/` : Stocke les résultats générés, tels que les modèles entraînés, les fichiers de similarités, et les visualisations interactives.
 - `rapport_word2vec.tex` et `rapport_word2vec.pdf` : Le rapport scientifique final en LaTeX et sa version PDF compilée.
 - `README.md` : La documentation principale du projet, décrivant les objectifs, la structure et les instructions d'utilisation.
-# 🎬 Projet Word2Vec — Analyse Sémantique de Synopsis de Films
+#  Projet Word2Vec — Analyse Sémantique de Synopsis de Films
 
-## 🎯 Objectif du projet
+##  Objectif du projet
 Ce projet a pour ambition d’explorer les relations sémantiques entre les mots et les films à partir d’un vaste corpus de synopsis cinématographiques.  
 Grâce à l’algorithme **Word2Vec**, il est possible de représenter les mots et les œuvres sous forme de vecteurs dans un espace sémantique afin d’identifier des similarités de sens, de ton ou de genre.
 
@@ -27,7 +27,7 @@ Les objectifs principaux :
 
 ---
 
-## 🧠 Approche méthodologique
+##  Approche méthodologique
 
 1. **Prétraitement des données**  
    - Nettoyage des synopsis (tokenisation, lemmatisation, suppression du bruit).  
@@ -45,7 +45,7 @@ Les objectifs principaux :
 
 ---
 
-## 🗂️ Structure du dépôt
+##  Structure du dépôt
 
 ```
 w2v_project/
@@ -74,22 +74,22 @@ w2v_project/
 
 ---
 
-## 🚀 Exécution rapide
+##  Exécution rapide
 
 ```bash
-# 1️⃣ Lancer l’entraînement complet
+# 1️) Lancer l’entraînement complet
 python src/w2v_movies.py --no-light --window 10 --vector-size 200 --min-count 10 --negative 15 --sg 1 --epochs 10
 
-# 2️⃣ Recalculer les visualisations t-SNE
+# 2️) Recalculer les visualisations t-SNE
 python src/w2v_movies.py --recompute-tsne
 
-# 3️⃣ Générer le rapport final
+# 3️) Générer le rapport final
 tectonic rapport_word2vec.tex
 ```
 
 ---
 
-## 📊 Résultats clés
+##  Résultats clés
 
 - **Entropie du corpus :** ~12.25 bits  
 - **Sanity Check (genre agreement) :** ≈ 73 %  
@@ -104,7 +104,7 @@ Les visualisations t-SNE et le dashboard permettent d’explorer les relations s
 
 ---
 
-## ✍️ Auteur
+##  Auteur
 **Mevlut Cakin (WalterWhite75)**  
 Master 2 BIDABI — Université Sorbonne Paris Nord  
-📧 [GitHub](https://github.com/WalterWhite75)
+ [GitHub](https://github.com/WalterWhite75)
